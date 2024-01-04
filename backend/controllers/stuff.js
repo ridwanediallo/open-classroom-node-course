@@ -65,12 +65,11 @@ exports.deleteThing = (req, res, next) => {
         error: new Error('Thing not found!'),
       });
     }
-    if (thing.userId !== req.params.userId) {
-      return res.status(400).json({
+    if (thing.userId !== req.auth.userId) {
+      return res.status(401).json({
         error: new Error('Unauthorized request!'),
       });
     }
-
     Thing.deleteOne({ _id: req.params.id })
       .then(() => {
         res.status(200).json({
