@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
@@ -10,7 +12,7 @@ const app = express();
 
 mongoose
   .connect(
-    'mongodb+srv://Livwan:nk64ssD88Li4MbLF@cluster0.noe5tln.mongodb.net/?retryWrites=true&w=majority'
+    `mongodb+srv://Livwan:${process.env.MONGODB_PASSWORD}@cluster0.noe5tln.mongodb.net/?retryWrites=true&w=majority`
   )
   .then(() => {
     console.log('Successfully connected to MongoDB Atlas!');
