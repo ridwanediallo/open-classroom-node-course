@@ -1,3 +1,5 @@
+const fs = require('fs');
+
 const Thing = require('../models/thing');
 exports.createThing = (req, res, next) => {
   req.body.thing = JSON.parse(req.body.thing);
@@ -39,26 +41,26 @@ exports.getOneThing = (req, res, next) => {
 
 exports.modifyThing = (req, res, next) => {
   let thing = new Thing({ _id: req.params.id });
-  if(req.file) {
-      const url = req.protocol + '://' + req.get('host');
-      req.body.thing = JSON.parse(req.body.thing);
-      thing = {
-        _id: req.params.id,
-        title: req.body.thing.title,
-        description: req.body.thing.description,
-        imageUrl: url + '/images/' + req.file.filename,
-        price: req.body.thing.price,
-        userId: req.body.thing.userId,
-      };
+  if (req.file) {
+    const url = req.protocol + '://' + req.get('host');
+    req.body.thing = JSON.parse(req.body.thing);
+    thing = {
+      _id: req.params.id,
+      title: req.body.thing.title,
+      description: req.body.thing.description,
+      imageUrl: url + '/images/' + req.file.filename,
+      price: req.body.thing.price,
+      userId: req.body.thing.userId,
+    };
   } else {
-      thing = {
-        _id: req.params.id,
-        title: req.body.title,
-        description: req.body.description,
-        imageUrl: req.body.imageUrl,
-        price: req.body.price,
-        userId: req.body.userId,
-      };
+    thing = {
+      _id: req.params.id,
+      title: req.body.title,
+      description: req.body.description,
+      imageUrl: req.body.imageUrl,
+      price: req.body.price,
+      userId: req.body.userId,
+    };
   }
 
   Thing.updateOne({ _id: req.params.id }, thing)
@@ -86,17 +88,21 @@ exports.deleteThing = (req, res, next) => {
         error: new Error('Unauthorized request!'),
       });
     }
-    Thing.deleteOne({ _id: req.params.id })
-      .then(() => {
-        res.status(200).json({
-          message: 'Deleted!',
+
+    const filename = thing.imageUrl.split('/images/')[1];
+    fs.unlink('images/' + filename, () => {
+      Thing.deleteOne({ _id: req.params.id })
+        .then(() => {
+          res.status(200).json({
+            message: 'Deleted!',
+          });
+        })
+        .catch((error) => {
+          res.status(400).json({
+            error: error,
+          });
         });
-      })
-      .catch((error) => {
-        res.status(400).json({
-          error: error,
-        });
-      });
+    });
   });
 };
 
